@@ -1,5 +1,28 @@
+# Dependencies
 node_modules/
-__pycache__/
-*.pyc
-db.sqlite3
+.pnp
+.pnp.js
+
+# Database
+*.db
+*.db-journal
+
+# Build
+dist/
+build/
+
+# Environment
 .env
+.env.local
+
+# Prisma: the migration history is committed; the deploy runs prisma migrate deploy
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

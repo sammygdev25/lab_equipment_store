@@ -2,5 +2,15 @@
   "project_name": "lab_equipment_store",
   "current_version": "1.0",
   "current_generation": 1,
-  "versions": []
+  "versions": [
+    {
+      "version": "1.0",
+      "phase": "init",
+      "commit_hash": "3f7de38",
+      "message": "Initial project creation - lab_equipment_store",
+      "timestamp": "2026-10-25T17:56:37.228704+00:00",
+      "files_changed": 2,
+      "generation_id": 1
+    }
+  ]
 }

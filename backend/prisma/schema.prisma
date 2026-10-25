@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  isActive  Boolean  @default(true) @map("is_active")
+  isStaff   Boolean  @default(false) @map("is_staff")
+  passwordHash  String? @map("password_hash")
+  name  String?
+  role  String @default("customer")
+  googleId  String? @map("google_id") @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  refreshTokens RefreshToken[]
+  cartItems  CartItem[]
+  orders  Order[]
+
+  @@map("users")
+}
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  tokenHash String    @unique @map("token_hash")
+  userId    Int       @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
+model Category {
+  id        Int      @id @default(autoincrement())
+  name  String
+  slug  String
+  description  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  equipments  Equipment[]
+
+  @@map("categories")
+}
+model Equipment {
+  id        Int      @id @default(autoincrement())
+  name  String
+  description  String
+  sku  String
+  price  Float
+  stockQuantity  Int  @map("stock_quantity")
+  categoryId  Int  @map("category_id")
+  category  Category  @relation(fields: [categoryId], references: [id])
+  imageUrl  String  @map("image_url")
+  isActive  Boolean  @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  cartItems  CartItem[]
+  orderItems  OrderItem[]
+
+  @@map("equipments")
+}
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId  Int  @map("user_id")
+  user  User  @relation(fields: [userId], references: [id])
+  equipmentId  Int  @map("equipment_id")
+  equipment  Equipment  @relation(fields: [equipmentId], references: [id])
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cartitems")
+}
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId  Int  @map("user_id")
+  user  User  @relation(fields: [userId], references: [id])
+  totalAmount  Float  @map("total_amount")
+  status  String
+  stripePaymentIntentId  String  @map("stripe_payment_intent_id")
+  shippingAddress  String  @map("shipping_address")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  orderItems  OrderItem[]
+  paidAt DateTime? @map("paid_at")
+  stripeSessionId String? @unique @map("stripe_session_id")
+
+  @@map("orders")
+}
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId  Int  @map("order_id")
+  order  Order  @relation(fields: [orderId], references: [id])
+  equipmentId  Int  @map("equipment_id")
+  equipment  Equipment  @relation(fields: [equipmentId], references: [id])
+  quantity  Int
+  priceAtPurchase  Float  @map("price_at_purchase")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("orderitems")
+}

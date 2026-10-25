@@ -1,0 +1,1560 @@
+{
+  "name": "lab_equipment_store",
+  "description": "Medical lab equipment ordering platform with category browsing, cart, Stripe checkout, order history, Google OAuth, and separate sales-staff inventory management",
+  "tech": {
+    "backend_port": 8000,
+    "frontend_port": 3000,
+    "api_base_url": "http://localhost:8000/api",
+    "auth_strategy": "jwt",
+    "state_management": "context",
+    "database": "sqlite3",
+    "css_framework": "tailwind",
+    "project_type": "fullstack_express",
+    "game_engine": "",
+    "game_interfaces": {},
+    "frontend_framework": "react",
+    "python_packages": [],
+    "node_packages": {
+      "axios": "^1.6.0",
+      "react-router-dom": "^6.20.0",
+      "@react-oauth/google": "^0.12.1",
+      "@stripe/stripe-js": "^2.4.0",
+      "jsonwebtoken": "^9.0.2",
+      "bcryptjs": "^2.4.3",
+      "stripe": "^14.10.0",
+      "@prisma/client": "^5.7.0",
+      "zod": "^3.22.4"
+    },
+    "typescript": true,
+    "user_roles": [],
+    "production_security": true,
+    "google_oauth": true,
+    "payments": true,
+    "payments_effect": false
+  },
+  "models": [
+    {
+      "name": "User",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "email",
+          "type": "EmailField",
+          "kwargs": {
+            "unique": "True"
+          }
+        },
+        {
+          "name": "password_hash",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "255",
+            "blank": "True",
+            "null": "True"
+          }
+        },
+        {
+          "name": "name",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "150"
+          }
+        },
+        {
+          "name": "role",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "20",
+            "default": "'customer'"
+          }
+        },
+        {
+          "name": "google_id",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "255",
+            "blank": "True",
+            "null": "True",
+            "unique": "True"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['-created_at']"
+      },
+      "str_field": "email"
+    },
+    {
+      "name": "Category",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "name",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "100",
+            "unique": "True"
+          }
+        },
+        {
+          "name": "slug",
+          "type": "SlugField",
+          "kwargs": {
+            "max_length": "120",
+            "unique": "True"
+          }
+        },
+        {
+          "name": "description",
+          "type": "TextField",
+          "kwargs": {
+            "blank": "True"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['name']"
+      },
+      "str_field": "name"
+    },
+    {
+      "name": "Equipment",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "name",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "200"
+          }
+        },
+        {
+          "name": "description",
+          "type": "TextField",
+          "kwargs": {
+            "blank": "True"
+          }
+        },
+        {
+          "name": "sku",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "50",
+            "unique": "True"
+          }
+        },
+        {
+          "name": "price",
+          "type": "DecimalField",
+          "kwargs": {
+            "max_digits": "10",
+            "decimal_places": "2"
+          }
+        },
+        {
+          "name": "stock_quantity",
+          "type": "IntegerField",
+          "kwargs": {
+            "default": "0"
+          }
+        },
+        {
+          "name": "category",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'Category'",
+            "on_delete": "models.CASCADE",
+            "related_name": "'equipment_items'"
+          }
+        },
+        {
+          "name": "image_url",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "500",
+            "blank": "True"
+          }
+        },
+        {
+          "name": "is_active",
+          "type": "BooleanField",
+          "kwargs": {
+            "default": "True"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['name']"
+      },
+      "str_field": "name"
+    },
+    {
+      "name": "CartItem",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'User'",
+            "on_delete": "models.CASCADE",
+            "related_name": "'cart_items'"
+          }
+        },
+        {
+          "name": "equipment",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'Equipment'",
+            "on_delete": "models.CASCADE",
+            "related_name": "'cart_items'"
+          }
+        },
+        {
+          "name": "quantity",
+          "type": "IntegerField",
+          "kwargs": {
+            "default": "1"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['-created_at']"
+      },
+      "str_field": "equipment"
+    },
+    {
+      "name": "Order",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "user",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'User'",
+            "on_delete": "models.CASCADE",
+            "related_name": "'orders'"
+          }
+        },
+        {
+          "name": "total_amount",
+          "type": "DecimalField",
+          "kwargs": {
+            "max_digits": "10",
+            "decimal_places": "2"
+          }
+        },
+        {
+          "name": "status",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "20",
+            "default": "'pending'"
+          }
+        },
+        {
+          "name": "stripe_payment_intent_id",
+          "type": "CharField",
+          "kwargs": {
+            "max_length": "255",
+            "blank": "True",
+            "null": "True"
+          }
+        },
+        {
+          "name": "shipping_address",
+          "type": "TextField",
+          "kwargs": {}
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['-created_at']"
+      },
+      "str_field": "id"
+    },
+    {
+      "name": "OrderItem",
+      "app_label": "api",
+      "fields": [
+        {
+          "name": "order",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'Order'",
+            "on_delete": "models.CASCADE",
+            "related_name": "'items'"
+          }
+        },
+        {
+          "name": "equipment",
+          "type": "ForeignKey",
+          "kwargs": {
+            "to": "'Equipment'",
+            "on_delete": "models.PROTECT",
+            "related_name": "'order_items'"
+          }
+        },
+        {
+          "name": "quantity",
+          "type": "IntegerField",
+          "kwargs": {}
+        },
+        {
+          "name": "price_at_purchase",
+          "type": "DecimalField",
+          "kwargs": {
+            "max_digits": "10",
+            "decimal_places": "2"
+          }
+        },
+        {
+          "name": "created_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now_add": "True"
+          }
+        },
+        {
+          "name": "updated_at",
+          "type": "DateTimeField",
+          "kwargs": {
+            "auto_now": "True"
+          }
+        }
+      ],
+      "meta": {
+        "ordering": "['id']"
+      },
+      "str_field": "equipment"
+    }
+  ],
+  "endpoints": [
+    {
+      "path": "/api/auth/register/",
+      "methods": [
+        "POST"
+      ],
+      "view_name": "AuthController",
+      "serializer": "RegisterSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "auth-register",
+      "query_params": [],
+      "is_viewset": false
+    },
+    {
+      "path": "/api/auth/login/",
+      "methods": [
+        "POST"
+      ],
+      "view_name": "AuthController",
+      "serializer": "LoginSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "auth-login",
+      "query_params": [],
+      "is_viewset": false
+    },
+    {
+      "path": "/api/auth/google/",
+      "methods": [
+        "POST"
+      ],
+      "view_name": "AuthController",
+      "serializer": "GoogleAuthSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "auth-google",
+      "query_params": [],
+      "is_viewset": false
+    },
+    {
+      "path": "/api/categories/",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "view_name": "CategoryController",
+      "serializer": "CategorySchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "category-list",
+      "query_params": [],
+      "is_viewset": true
+    },
+    {
+      "path": "/api/equipment/",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "view_name": "EquipmentController",
+      "serializer": "EquipmentSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "equipment-list",
+      "query_params": [],
+      "is_viewset": true
+    },
+    {
+      "path": "/api/cart/",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "view_name": "CartController",
+      "serializer": "CartItemSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "cart-list",
+      "query_params": [],
+      "is_viewset": true
+    },
+    {
+      "path": "/api/orders/",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "view_name": "OrderController",
+      "serializer": "OrderSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "order-list",
+      "query_params": [],
+      "is_viewset": true
+    },
+    {
+      "path": "/api/checkout/",
+      "methods": [
+        "POST"
+      ],
+      "view_name": "CheckoutController",
+      "serializer": "CheckoutSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "checkout",
+      "query_params": [],
+      "is_viewset": false
+    },
+    {
+      "path": "/api/webhooks/stripe/",
+      "methods": [
+        "POST"
+      ],
+      "view_name": "StripeWebhookController",
+      "serializer": "StripeWebhookSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "stripe-webhook",
+      "query_params": [],
+      "is_viewset": false
+    },
+    {
+      "path": "/api/inventory/",
+      "methods": [
+        "GET",
+        "PATCH"
+      ],
+      "view_name": "InventoryController",
+      "serializer": "InventoryUpdateSchema",
+      "permissions": [
+        "IsAuthenticatedOrReadOnly"
+      ],
+      "url_name": "inventory-list",
+      "query_params": [],
+      "is_viewset": true
+    }
+  ],
+  "components": [
+    {
+      "name": "Navbar",
+      "file_path": "frontend/src/components/Navbar.tsx",
+      "props": {
+        "user": "Object",
+        "cartItemCount": "Number",
+        "onLogout": "Function"
+      },
+      "imports_from": [
+        "../contexts/AuthContext",
+        "../contexts/CartContext"
+      ],
+      "exports": [
+        "Navbar"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryFilter",
+      "file_path": "frontend/src/components/CategoryFilter.tsx",
+      "props": {
+        "categories": "Array",
+        "selectedCategory": "String",
+        "onSelectCategory": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "CategoryFilter"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "EquipmentCard",
+      "file_path": "frontend/src/components/EquipmentCard.tsx",
+      "props": {
+        "equipment": "Object",
+        "onAddToCart": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "EquipmentCard"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "EquipmentList",
+      "file_path": "frontend/src/components/EquipmentList.tsx",
+      "props": {
+        "equipment": "Array",
+        "onAddToCart": "Function"
+      },
+      "imports_from": [
+        "./EquipmentCard"
+      ],
+      "exports": [
+        "EquipmentList"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CartItemRow",
+      "file_path": "frontend/src/components/CartItemRow.tsx",
+      "props": {
+        "item": "Object",
+        "onUpdateQuantity": "Function",
+        "onRemove": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "CartItemRow"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CartSummary",
+      "file_path": "frontend/src/components/CartSummary.tsx",
+      "props": {
+        "items": "Array",
+        "total": "Number",
+        "onCheckout": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "CartSummary"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CheckoutForm",
+      "file_path": "frontend/src/components/CheckoutForm.tsx",
+      "props": {
+        "total": "Number",
+        "onSubmit": "Function",
+        "loading": "Boolean"
+      },
+      "imports_from": [],
+      "exports": [
+        "CheckoutForm"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderHistoryList",
+      "file_path": "frontend/src/components/OrderHistoryList.tsx",
+      "props": {
+        "orders": "Array"
+      },
+      "imports_from": [],
+      "exports": [
+        "OrderHistoryList"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderHistoryItem",
+      "file_path": "frontend/src/components/OrderHistoryItem.tsx",
+      "props": {
+        "order": "Object"
+      },
+      "imports_from": [],
+      "exports": [
+        "OrderHistoryItem"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "InventoryTable",
+      "file_path": "frontend/src/components/InventoryTable.tsx",
+      "props": {
+        "equipment": "Array",
+        "onEdit": "Function",
+        "onDelete": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "InventoryTable"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "InventoryItemForm",
+      "file_path": "frontend/src/components/InventoryItemForm.tsx",
+      "props": {
+        "initialData": "Object",
+        "onSubmit": "Function",
+        "categories": "Array"
+      },
+      "imports_from": [],
+      "exports": [
+        "InventoryItemForm"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "GoogleLoginButton",
+      "file_path": "frontend/src/components/GoogleLoginButton.tsx",
+      "props": {
+        "onSuccess": "Function",
+        "onError": "Function"
+      },
+      "imports_from": [],
+      "exports": [
+        "GoogleLoginButton"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "HomeHero",
+      "file_path": "frontend/src/components/HomeHero.tsx",
+      "props": {
+        "section": "Hero",
+        "page": "HomePage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "HomeHero"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "HomeFeatured",
+      "file_path": "frontend/src/components/HomeFeatured.tsx",
+      "props": {
+        "section": "Featured equipments",
+        "page": "HomePage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "HomeFeatured"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "HomeCategories",
+      "file_path": "frontend/src/components/HomeCategories.tsx",
+      "props": {
+        "section": "Browse by category",
+        "page": "HomePage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "HomeCategories"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "HomeAbout",
+      "file_path": "frontend/src/components/HomeAbout.tsx",
+      "props": {
+        "section": "About or testimonials",
+        "page": "HomePage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "HomeAbout"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "HomeCta",
+      "file_path": "frontend/src/components/HomeCta.tsx",
+      "props": {
+        "section": "Call to action",
+        "page": "HomePage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "HomeCta"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryListHeader",
+      "file_path": "frontend/src/components/CategoryListHeader.tsx",
+      "props": {
+        "section": "Page header",
+        "page": "CategoryListPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryListHeader"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryListFilters",
+      "file_path": "frontend/src/components/CategoryListFilters.tsx",
+      "props": {
+        "section": "Filters and search",
+        "page": "CategoryListPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryListFilters"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryListGrid",
+      "file_path": "frontend/src/components/CategoryListGrid.tsx",
+      "props": {
+        "section": "Results",
+        "page": "CategoryListPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryListGrid"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryListPagination",
+      "file_path": "frontend/src/components/CategoryListPagination.tsx",
+      "props": {
+        "section": "Pagination",
+        "page": "CategoryListPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryListPagination"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryMedia",
+      "file_path": "frontend/src/components/CategoryMedia.tsx",
+      "props": {
+        "section": "Media and title",
+        "page": "CategoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryMedia"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryFacts",
+      "file_path": "frontend/src/components/CategoryFacts.tsx",
+      "props": {
+        "section": "Details",
+        "page": "CategoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryFacts"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CategoryRelated",
+      "file_path": "frontend/src/components/CategoryRelated.tsx",
+      "props": {
+        "section": "Related equipments",
+        "page": "CategoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CategoryRelated"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CartHeader",
+      "file_path": "frontend/src/components/CartHeader.tsx",
+      "props": {
+        "section": "Page header",
+        "page": "CartPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CartHeader"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CartItems",
+      "file_path": "frontend/src/components/CartItems.tsx",
+      "props": {
+        "section": "Items",
+        "page": "CartPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CartItems"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CheckoutHeader",
+      "file_path": "frontend/src/components/CheckoutHeader.tsx",
+      "props": {
+        "section": "Page header",
+        "page": "CheckoutPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CheckoutHeader"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "CheckoutSummary",
+      "file_path": "frontend/src/components/CheckoutSummary.tsx",
+      "props": {
+        "section": "Order summary",
+        "page": "CheckoutPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "CheckoutSummary"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderHistoryHeader",
+      "file_path": "frontend/src/components/OrderHistoryHeader.tsx",
+      "props": {
+        "section": "Page header",
+        "page": "OrderHistoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderHistoryHeader"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderHistoryContent",
+      "file_path": "frontend/src/components/OrderHistoryContent.tsx",
+      "props": {
+        "section": "Content",
+        "page": "OrderHistoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderHistoryContent"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderHistoryDetails",
+      "file_path": "frontend/src/components/OrderHistoryDetails.tsx",
+      "props": {
+        "section": "Account details",
+        "page": "OrderHistoryPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderHistoryDetails"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderDetailMedia",
+      "file_path": "frontend/src/components/OrderDetailMedia.tsx",
+      "props": {
+        "section": "Media and title",
+        "page": "OrderDetailPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderDetailMedia"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderDetailFacts",
+      "file_path": "frontend/src/components/OrderDetailFacts.tsx",
+      "props": {
+        "section": "Details",
+        "page": "OrderDetailPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderDetailFacts"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "OrderDetailRelated",
+      "file_path": "frontend/src/components/OrderDetailRelated.tsx",
+      "props": {
+        "section": "Related equipments",
+        "page": "OrderDetailPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "OrderDetailRelated"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "InventoryManagementHeader",
+      "file_path": "frontend/src/components/InventoryManagementHeader.tsx",
+      "props": {
+        "section": "Page header",
+        "page": "InventoryManagementPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "InventoryManagementHeader"
+      ],
+      "is_default_export": true
+    },
+    {
+      "name": "InventoryManagementContent",
+      "file_path": "frontend/src/components/InventoryManagementContent.tsx",
+      "props": {
+        "section": "Content",
+        "page": "InventoryManagementPage"
+      },
+      "imports_from": [
+        "../components/ui",
+        "../components/icons"
+      ],
+      "exports": [
+        "InventoryManagementContent"
+      ],
+      "is_default_export": true
+    }
+  ],
+  "contexts": [
+    {
+      "name": "AuthContext",
+      "file_path": "frontend/src/contexts/AuthContext.tsx",
+      "provider_name": "AuthProvider",
+      "state_shape": {
+        "user": "Object",
+        "token": "String",
+        "isAuthenticated": "Boolean",
+        "isSalesStaff": "Boolean",
+        "loading": "Boolean"
+      },
+      "actions": [
+        "login",
+        "register",
+        "loginWithGoogle",
+        "logout",
+        "staffLogin"
+      ],
+      "hook_name": "useAuth"
+    },
+    {
+      "name": "CartContext",
+      "file_path": "frontend/src/contexts/CartContext.tsx",
+      "provider_name": "CartProvider",
+      "state_shape": {
+        "items": "Array",
+        "total": "Number",
+        "itemCount": "Number"
+      },
+      "actions": [
+        "addItem",
+        "removeItem",
+        "updateQuantity",
+        "clearCart"
+      ],
+      "hook_name": "useCart"
+    }
+  ],
+  "pages": [
+    {
+      "name": "HomePage",
+      "file_path": "frontend/src/pages/HomePage.tsx",
+      "route": "/",
+      "requires_auth": false,
+      "uses_contexts": [
+        "CartContext"
+      ],
+      "uses_components": [
+        "EquipmentList",
+        "CategoryFilter",
+        "Navbar",
+        "HomeHero",
+        "HomeFeatured",
+        "HomeCategories",
+        "HomeAbout",
+        "HomeCta"
+      ]
+    },
+    {
+      "name": "CategoryListPage",
+      "file_path": "frontend/src/pages/CategoryListPage.tsx",
+      "route": "/categories",
+      "requires_auth": false,
+      "uses_contexts": [
+        "CartContext"
+      ],
+      "uses_components": [
+        "CategoryListHeader",
+        "CategoryListFilters",
+        "CategoryListGrid",
+        "CategoryListPagination"
+      ]
+    },
+    {
+      "name": "CategoryPage",
+      "file_path": "frontend/src/pages/CategoryPage.tsx",
+      "route": "/categories/:slug",
+      "requires_auth": false,
+      "uses_contexts": [
+        "CartContext"
+      ],
+      "uses_components": [
+        "EquipmentList",
+        "CategoryFilter",
+        "Navbar",
+        "CategoryMedia",
+        "CategoryFacts",
+        "CategoryRelated"
+      ]
+    },
+    {
+      "name": "CartPage",
+      "file_path": "frontend/src/pages/CartPage.tsx",
+      "route": "/cart",
+      "requires_auth": true,
+      "uses_contexts": [
+        "CartContext",
+        "AuthContext"
+      ],
+      "uses_components": [
+        "CartItemRow",
+        "CartSummary",
+        "Navbar",
+        "CartHeader",
+        "CartItems"
+      ]
+    },
+    {
+      "name": "CheckoutPage",
+      "file_path": "frontend/src/pages/CheckoutPage.tsx",
+      "route": "/checkout",
+      "requires_auth": true,
+      "uses_contexts": [
+        "CartContext",
+        "AuthContext"
+      ],
+      "uses_components": [
+        "CheckoutForm",
+        "Navbar",
+        "CheckoutHeader",
+        "CheckoutSummary"
+      ]
+    },
+    {
+      "name": "OrderHistoryPage",
+      "file_path": "frontend/src/pages/OrderHistoryPage.tsx",
+      "route": "/orders",
+      "requires_auth": true,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": [
+        "OrderHistoryList",
+        "Navbar",
+        "OrderHistoryHeader",
+        "OrderHistoryContent",
+        "OrderHistoryDetails"
+      ]
+    },
+    {
+      "name": "OrderDetailPage",
+      "file_path": "frontend/src/pages/OrderDetailPage.tsx",
+      "route": "/orders/:id",
+      "requires_auth": true,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": [
+        "OrderHistoryItem",
+        "Navbar",
+        "OrderDetailMedia",
+        "OrderDetailFacts",
+        "OrderDetailRelated"
+      ]
+    },
+    {
+      "name": "LoginPage",
+      "file_path": "frontend/src/pages/LoginPage.tsx",
+      "route": "/login",
+      "requires_auth": false,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": [
+        "GoogleLoginButton"
+      ]
+    },
+    {
+      "name": "RegisterPage",
+      "file_path": "frontend/src/pages/RegisterPage.tsx",
+      "route": "/register",
+      "requires_auth": false,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": [
+        "GoogleLoginButton"
+      ]
+    },
+    {
+      "name": "SalesStaffLoginPage",
+      "file_path": "frontend/src/pages/SalesStaffLoginPage.tsx",
+      "route": "/staff/login",
+      "requires_auth": false,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": []
+    },
+    {
+      "name": "InventoryManagementPage",
+      "file_path": "frontend/src/pages/InventoryManagementPage.tsx",
+      "route": "/staff/inventory",
+      "requires_auth": true,
+      "uses_contexts": [
+        "AuthContext"
+      ],
+      "uses_components": [
+        "InventoryTable",
+        "InventoryItemForm",
+        "Navbar",
+        "InventoryManagementHeader",
+        "InventoryManagementContent"
+      ]
+    }
+  ],
+  "domains": [
+    {
+      "name": "auth",
+      "description": "User accounts, JWT authentication, Google OAuth, and separate sales-staff login",
+      "backend_files": [
+        "backend/src/routes/auth.ts",
+        "backend/src/controllers/authController.ts",
+        "backend/src/services/authService.ts"
+      ],
+      "frontend_files": [
+        "frontend/src/pages/LoginPage.tsx",
+        "frontend/src/pages/RegisterPage.tsx",
+        "frontend/src/pages/SalesStaffLoginPage.tsx",
+        "frontend/src/components/GoogleLoginButton.tsx",
+        "frontend/src/components/Navbar.tsx",
+        "frontend/src/contexts/AuthContext.tsx"
+      ],
+      "models_owned": [
+        "User"
+      ],
+      "models_read": [],
+      "endpoints_owned": [
+        "/api/auth/register/",
+        "/api/auth/login/",
+        "/api/auth/google/"
+      ],
+      "components_owned": [
+        "GoogleLoginButton",
+        "Navbar"
+      ],
+      "contexts_owned": [
+        "AuthContext"
+      ],
+      "pages_owned": [
+        "LoginPage",
+        "RegisterPage",
+        "SalesStaffLoginPage"
+      ]
+    },
+    {
+      "name": "catalog",
+      "description": "Lab equipment catalog, categories, and browsing",
+      "backend_files": [
+        "backend/src/routes/catalog.ts",
+        "backend/src/controllers/catalogController.ts"
+      ],
+      "frontend_files": [
+        "frontend/src/components/HomeHero.tsx",
+        "frontend/src/components/HomeFeatured.tsx",
+        "frontend/src/components/HomeCategories.tsx",
+        "frontend/src/components/HomeAbout.tsx",
+        "frontend/src/components/HomeCta.tsx",
+        "frontend/src/pages/HomePage.tsx",
+        "frontend/src/components/CategoryListHeader.tsx",
+        "frontend/src/components/CategoryListFilters.tsx",
+        "frontend/src/components/CategoryListGrid.tsx",
+        "frontend/src/components/CategoryListPagination.tsx",
+        "frontend/src/pages/CategoryListPage.tsx",
+        "frontend/src/components/CategoryMedia.tsx",
+        "frontend/src/components/CategoryFacts.tsx",
+        "frontend/src/components/CategoryRelated.tsx",
+        "frontend/src/pages/CategoryPage.tsx",
+        "frontend/src/components/EquipmentCard.tsx",
+        "frontend/src/components/EquipmentList.tsx",
+        "frontend/src/components/CategoryFilter.tsx"
+      ],
+      "models_owned": [
+        "Category",
+        "Equipment"
+      ],
+      "models_read": [],
+      "endpoints_owned": [
+        "/api/categories/",
+        "/api/equipment/"
+      ],
+      "components_owned": [
+        "EquipmentCard",
+        "EquipmentList",
+        "CategoryFilter",
+        "HomeHero",
+        "HomeFeatured",
+        "HomeCategories",
+        "HomeAbout",
+        "HomeCta",
+        "CategoryListHeader",
+        "CategoryListFilters",
+        "CategoryListGrid",
+        "CategoryListPagination",
+        "CategoryMedia",
+        "CategoryFacts",
+        "CategoryRelated"
+      ],
+      "contexts_owned": [],
+      "pages_owned": [
+        "HomePage",
+        "CategoryPage",
+        "CategoryListPage"
+      ]
+    },
+    {
+      "name": "cart",
+      "description": "Shopping cart management for customers",
+      "backend_files": [
+        "backend/src/routes/cart.ts",
+        "backend/src/controllers/cartController.ts"
+      ],
+      "frontend_files": [
+        "frontend/src/components/CartHeader.tsx",
+        "frontend/src/components/CartItems.tsx",
+        "frontend/src/pages/CartPage.tsx",
+        "frontend/src/components/CartItemRow.tsx",
+        "frontend/src/components/CartSummary.tsx",
+        "frontend/src/contexts/CartContext.tsx"
+      ],
+      "models_owned": [
+        "CartItem"
+      ],
+      "models_read": [
+        "User",
+        "Equipment"
+      ],
+      "endpoints_owned": [
+        "/api/cart/"
+      ],
+      "components_owned": [
+        "CartItemRow",
+        "CartSummary",
+        "CartHeader",
+        "CartItems"
+      ],
+      "contexts_owned": [
+        "CartContext"
+      ],
+      "pages_owned": [
+        "CartPage"
+      ]
+    },
+    {
+      "name": "orders",
+      "description": "Stripe checkout, order creation, webhooks, and order history",
+      "backend_files": [
+        "backend/src/routes/orders.ts",
+        "backend/src/controllers/orderController.ts",
+        "backend/src/services/stripeService.ts",
+        "backend/src/routes/webhooks.ts"
+      ],
+      "frontend_files": [
+        "frontend/src/components/CheckoutHeader.tsx",
+        "frontend/src/components/CheckoutSummary.tsx",
+        "frontend/src/pages/CheckoutPage.tsx",
+        "frontend/src/components/OrderHistoryHeader.tsx",
+        "frontend/src/components/OrderHistoryContent.tsx",
+        "frontend/src/components/OrderHistoryDetails.tsx",
+        "frontend/src/pages/OrderHistoryPage.tsx",
+        "frontend/src/components/OrderDetailMedia.tsx",
+        "frontend/src/components/OrderDetailFacts.tsx",
+        "frontend/src/components/OrderDetailRelated.tsx",
+        "frontend/src/pages/OrderDetailPage.tsx",
+        "frontend/src/components/CheckoutForm.tsx",
+        "frontend/src/components/OrderHistoryList.tsx",
+        "frontend/src/components/OrderHistoryItem.tsx"
+      ],
+      "models_owned": [
+        "Order",
+        "OrderItem"
+      ],
+      "models_read": [
+        "User",
+        "Equipment",
+        "CartItem"
+      ],
+      "endpoints_owned": [
+        "/api/orders/",
+        "/api/checkout/",
+        "/api/webhooks/stripe/"
+      ],
+      "components_owned": [
+        "CheckoutForm",
+        "OrderHistoryList",
+        "OrderHistoryItem",
+        "CheckoutHeader",
+        "CheckoutSummary",
+        "OrderHistoryHeader",
+        "OrderHistoryContent",
+        "OrderHistoryDetails",
+        "OrderDetailMedia",
+        "OrderDetailFacts",
+        "OrderDetailRelated"
+      ],
+      "contexts_owned": [],
+      "pages_owned": [
+        "CheckoutPage",
+        "OrderHistoryPage",
+        "OrderDetailPage"
+      ]
+    },
+    {
+      "name": "inventory",
+      "description": "Sales-staff inventory and stock management for lab equipment",
+      "backend_files": [
+        "backend/src/routes/inventory.ts",
+        "backend/src/controllers/inventoryController.ts"
+      ],
+      "frontend_files": [
+        "frontend/src/components/InventoryManagementHeader.tsx",
+        "frontend/src/components/InventoryManagementContent.tsx",
+        "frontend/src/pages/InventoryManagementPage.tsx",
+        "frontend/src/components/InventoryTable.tsx",
+        "frontend/src/components/InventoryItemForm.tsx"
+      ],
+      "models_owned": [],
+      "models_read": [
+        "Equipment",
+        "Category",
+        "User"
+      ],
+      "endpoints_owned": [
+        "/api/inventory/"
+      ],
+      "components_owned": [
+        "InventoryTable",
+        "InventoryItemForm",
+        "InventoryManagementHeader",
+        "InventoryManagementContent"
+      ],
+      "contexts_owned": [],
+      "pages_owned": [
+        "InventoryManagementPage"
+      ]
+    }
+  ],
+  "middleware": [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware"
+  ],
+  "installed_apps": [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "django_filters",
+    "api"
+  ]
+}
