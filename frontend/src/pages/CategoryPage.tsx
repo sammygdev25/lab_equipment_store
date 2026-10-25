@@ -6,7 +6,7 @@ import type { Category, Equipment } from '../types';
 import CategoryMedia from '../components/CategoryMedia';
 import CategoryFacts from '../components/CategoryFacts';
 import CategoryRelated from '../components/CategoryRelated';
-import { LoadingBlock, EmptyState, Alert } from '../components/ui';
+import { LoadingBlock, EmptyState, Alert, Button } from '../components/ui';
 
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -80,7 +80,7 @@ export default function CategoryPage() {
           icon="alert"
           title="Category not found"
           text="This equipment category doesn't exist or has been removed."
-          action={{ label: 'Browse categories', onClick: () => navigate('/categories') }}
+          action={<Button onClick={() => navigate('/categories')}>Browse categories</Button>}
         />
       </div>
     );
@@ -103,7 +103,7 @@ export default function CategoryPage() {
               icon="package"
               title="No equipment in this category yet"
               text="Check back soon or browse other lab equipment categories."
-              action={{ label: 'View all categories', onClick: () => navigate('/categories') }}
+              action={<Button onClick={() => navigate('/categories')}>View all categories</Button>}
             />
           </div>
         )}

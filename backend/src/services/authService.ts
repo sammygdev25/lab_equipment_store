@@ -38,13 +38,14 @@ export interface AuthResult {
 function toAuthUser(user: {
   id: number;
   email: string;
-  name: string;
+  name: string | null;
   role: string;
+  username: string;
 }): AuthUser {
   return {
     id: user.id,
     email: user.email,
-    name: user.name,
+    name: user.name ?? user.username,
     role: user.role,
   };
 }
@@ -67,7 +68,9 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 
   const user = await prisma.user.create({
     data: {
+      username: input.email,
       email: input.email,
+      password: passwordHash,
       passwordHash,
       name: input.name,
       role: 'customer',
@@ -133,9 +136,12 @@ export async function googleAuthUser(input: GoogleAuthInput): Promise<AuthResult
         data: { googleId: input.googleId },
       });
     } else {
+      const randomPasswordHash = await bcrypt.hash(input.googleId, SALT_ROUNDS);
       user = await prisma.user.create({
         data: {
+          username: input.email,
           email: input.email,
+          password: randomPasswordHash,
           name: input.name,
           googleId: input.googleId,
           role: 'customer',

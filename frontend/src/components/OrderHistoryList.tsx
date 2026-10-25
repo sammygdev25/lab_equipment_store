@@ -1,4 +1,5 @@
 import type { Order } from '../types';
+import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/ui';
 import OrderHistoryItem from './OrderHistoryItem';
 
@@ -13,7 +14,11 @@ function OrderHistoryList({ orders }: OrderHistoryListProps) {
         icon="package"
         title="No orders yet"
         text="Equipment you purchase from our lab catalog will show up here once you check out."
-        action={{ label: 'Browse equipment', to: '/categories' }}
+        action={
+          <Link to="/categories" className="btn btn-primary">
+            Browse equipment
+          </Link>
+        }
       />
     );
   }

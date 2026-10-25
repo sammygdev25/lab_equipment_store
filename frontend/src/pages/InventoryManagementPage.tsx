@@ -46,12 +46,12 @@ export default function InventoryManagementPage() {
     setShowForm(true);
   };
 
-  const handleEdit = (item: Equipment) => {
+  const handleEdit = async (item: Equipment) => {
     setEditingItem(item);
     setShowForm(true);
   };
 
-  const handleCancelForm = () => {
+  const handleCancelForm = async () => {
     setShowForm(false);
     setEditingItem(null);
   };
@@ -65,7 +65,7 @@ export default function InventoryManagementPage() {
         setEquipment((prev) => prev.map((it) => (it.id === updated.id ? updated : it)));
         setFeedback('Item updated');
       } else {
-        const created = await createEquipment(data);
+        const created = await createEquipment(data as Omit<Equipment, 'id'>);
         setEquipment((prev) => [created, ...prev]);
         setFeedback('Item added');
       }
@@ -106,7 +106,6 @@ export default function InventoryManagementPage() {
           categories={categories}
           onSubmit={handleSubmit}
           onCancel={handleCancelForm}
-          submitting={submitting}
         />
       )}
 

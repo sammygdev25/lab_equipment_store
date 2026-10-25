@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { path: '/cart', label: 'Cart', auth: true },
   { path: '/orders', label: 'Order History', auth: true },
   { path: '/staff/inventory', label: 'Inventory Management', auth: true },
+  { path: '/staff/login', label: 'Staff Login' },
 ];
 
 export default function Navbar() {

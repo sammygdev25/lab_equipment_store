@@ -56,7 +56,7 @@ export default function CategoryListGrid({ equipment, loading, onAddToCart, onCl
                 <CardMeta>
                   <span>SKU {item.sku}</span>
                   {item.category?.name && (
-                    <Badge tone="soft">{item.category.name}</Badge>
+                    <Badge tone="soft">{item.category?.name}</Badge>
                   )}
                 </CardMeta>
                 <CardFooter>

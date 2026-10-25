@@ -47,7 +47,7 @@ export default function InventoryManagementContent({
             </thead>
             <tbody>
               {equipment.map((item) => {
-                const lowStock = item.stock_quantity <= 5;
+                const lowStock = item.stockQuantity <= 5;
                 return (
                   <tr key={item.id}>
                     <td>{item.name}</td>
@@ -56,12 +56,12 @@ export default function InventoryManagementContent({
                     <td>${Number(item.price).toFixed(2)}</td>
                     <td>
                       <Badge tone={lowStock ? 'danger' : 'success'}>
-                        {item.stock_quantity} in stock
+                        {item.stockQuantity} in stock
                       </Badge>
                     </td>
                     <td>
-                      <Badge tone={item.is_active ? 'primary' : 'neutral'}>
-                        {item.is_active ? 'Active' : 'Inactive'}
+                      <Badge tone={item.isActive ? 'primary' : 'neutral'}>
+                        {item.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </td>
                     <td>

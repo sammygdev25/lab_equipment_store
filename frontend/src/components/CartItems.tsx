@@ -65,7 +65,7 @@ export default function CartItems({ items, onUpdateQuantity, onRemove, sidebar }
                       <Icon name="plus" />
                     </Button>
                   </Cluster>
-                  <span className="ds-price">${lineTotal.toFixed(2)}</span>
+                  <span className="ds-price">${Number(lineTotal || 0).toFixed(2)}</span>
                   <Button variant="danger" size="md" onClick={() => onRemove(item.id)}>
                     <Icon name="trash" /> Remove
                   </Button>

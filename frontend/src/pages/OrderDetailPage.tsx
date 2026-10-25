@@ -32,7 +32,7 @@ export default function OrderDetailPage() {
         if (categoryId) {
           const allEquipment = await getEquipmentList();
           const orderedIds = new Set(
-            (data.items || []).map((i) => i.equipmentId)
+            (Array.isArray(data.items) ? data.items : []).map((i) => i.equipmentId)
           );
           const candidates = allEquipment
             .filter((eq) => eq.categoryId === categoryId && !orderedIds.has(eq.id))

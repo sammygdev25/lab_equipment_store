@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { api } from '../api';
+import { getCartItemList, createCartItem, updateCartItem, deleteCartItem } from '../api';
 import type { CartItem } from '../types';
 import { useAuth } from './AuthContext';
 
@@ -28,7 +28,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
-      const data = await api.get('/cart/');
+      const data = await getCartItemList();
       setItems(data);
     } catch (err) {
       console.error('[Cart] Failed to fetch cart:', err);
@@ -43,7 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(async (equipmentId: number, quantity: number = 1) => {
     try {
-      const item = await api.post('/cart/', { equipmentId, quantity });
+      const item = await createCartItem({ equipmentId, quantity } as Omit<CartItem, 'id'>);
       setItems((prev) => {
         const existing = prev.find((i) => i.id === item.id);
         if (existing) {
@@ -59,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = useCallback(async (id: number) => {
     try {
-      await api.delete(`/cart/${id}/`);
+      await deleteCartItem(id);
       setItems((prev) => prev.filter((i) => i.id !== id));
     } catch (err) {
       console.error('[Cart] Failed to remove item:', err);
@@ -70,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateQuantity = useCallback(async (id: number, quantity: number) => {
     if (quantity < 1) return;
     try {
-      const updated = await api.patch(`/cart/${id}/`, { quantity });
+      const updated = await updateCartItem(id, { quantity });
       setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
     } catch (err) {
       console.error('[Cart] Failed to update quantity:', err);
@@ -80,7 +80,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(async () => {
     try {
-      await Promise.all(items.map((i) => api.delete(`/cart/${i.id}/`)));
+      await Promise.all(items.map((i) => deleteCartItem(i.id)));
       setItems([]);
     } catch (err) {
       console.error('[Cart] Failed to clear cart:', err);

@@ -106,6 +106,8 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
           userId: req.userId!,
           totalAmount,
           shippingAddress,
+          status: 'pending',
+          stripePaymentIntentId: '',
           items: {
             create: items.map((item) => {
               const equipment = equipmentMap.get(item.equipmentId)!;

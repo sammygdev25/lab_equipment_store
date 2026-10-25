@@ -67,7 +67,7 @@ export async function getCategoryBySlug(req: Request, res: Response) {
     return res.status(400).json({ error: 'Invalid slug', code: 'validation_error', issues: parsedParams.error.issues });
   }
   try {
-    const category = await prisma.category.findUnique({
+    const category = await prisma.category.findFirst({
       where: { slug: parsedParams.data.slug },
     });
     if (!category) {
@@ -211,7 +211,7 @@ export async function createEquipment(req: AuthRequest, res: Response) {
     if (!category) {
       return res.status(400).json({ error: 'Category does not exist' });
     }
-    const existingSku = await prisma.equipment.findUnique({ where: { sku: parsed.data.sku } });
+    const existingSku = await prisma.equipment.findFirst({ where: { sku: parsed.data.sku } });
     if (existingSku) {
       return res.status(400).json({ error: 'Equipment with this SKU already exists' });
     }

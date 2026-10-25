@@ -58,10 +58,10 @@ router.get('/categories/:slug', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid slug', code: 'validation_error', issues: parsedParams.error.issues });
   }
   try {
-    const category = await prisma.category.findUnique({
+    const category = await prisma.category.findFirst({
       where: { slug: parsedParams.data.slug },
       include: {
-        equipmentItems: {
+        equipments: {
           where: { isActive: true },
           orderBy: { name: 'asc' },
         },

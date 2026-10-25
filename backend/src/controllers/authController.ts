@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { OAuth2Client } from 'google-auth-library';
+import type { User } from '@prisma/client';
 import prisma from '../database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
@@ -30,15 +31,11 @@ function generateToken(userId: number): string {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
-function sanitizeUser(user: {
-  id: number;
-  email: string;
-  name: string;
-  role: string;
-  googleId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}) {
+function generateUsernameFromEmail(email: string): string {
+  return email.split('@')[0];
+}
+
+function sanitizeUser(user: User) {
   return {
     id: user.id,
     email: user.email,
@@ -65,10 +62,13 @@ export async function register(req: Request, res: Response) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const username = generateUsernameFromEmail(email);
 
     const user = await prisma.user.create({
       data: {
+        username,
         email,
+        password: passwordHash,
         passwordHash,
         name,
         role: 'customer',
@@ -147,9 +147,13 @@ export async function googleAuth(req: Request, res: Response) {
           data: { googleId },
         });
       } else {
+        const randomPassword = await bcrypt.hash(`${googleId}${Date.now()}`, 10);
+        const username = generateUsernameFromEmail(email);
         user = await prisma.user.create({
           data: {
+            username,
             email,
+            password: randomPassword,
             name,
             role: 'customer',
             googleId,

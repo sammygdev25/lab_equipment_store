@@ -31,7 +31,7 @@ export function CardFooter({ className = '', children }: Slot) {
 export function Price({ value, currency = 'USD', className = '' }: PriceProps) {
   const num = typeof value === 'number' ? value : parseFloat(String(value ?? ''));
   const code = /^[A-Za-z]{3}$/.test(currency) ? currency.toUpperCase() : '';
-  const fmt = (n: number) => code ? new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(n) : currency + n.toFixed(2);
+  const fmt = (n: number) => code ? new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(n) : currency + Number(n || 0).toFixed(2);
   const text = Number.isFinite(num) ? fmt(num) : '';
   return <span className={['ds-price', className].filter(Boolean).join(' ')}>{text}</span>;
 }

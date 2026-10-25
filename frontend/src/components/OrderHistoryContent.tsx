@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Section, Badge, EmptyState, Price } from '../components/ui';
+import { Section, Badge, EmptyState, Button } from '../components/ui';
 import { Icon } from '../components/icons';
 import type { Order } from '../types';
 
@@ -35,7 +35,11 @@ export default function OrderHistoryContent({ orders }: OrderHistoryContentProps
           icon="package"
           title="No orders yet"
           text="Browse our catalog of lab equipment and place your first order."
-          action={{ label: 'Browse categories', to: '/categories' }}
+          action={
+            <Link to="/categories">
+              <Button>Browse categories</Button>
+            </Link>
+          }
         />
       </Section>
     );
@@ -69,9 +73,7 @@ export default function OrderHistoryContent({ orders }: OrderHistoryContentProps
                     ? `${order.items.length} item${order.items.length > 1 ? 's' : ''}`
                     : '—'}
                 </td>
-                <td>
-                  <Price value={order.totalAmount} />
-                </td>
+                <td>${order.totalAmount.toFixed(2)}</td>
                 <td>
                   <Badge tone={statusTone(order.status)}>{order.status}</Badge>
                 </td>

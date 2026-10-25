@@ -7,7 +7,9 @@ export default defineConfig({
     extensions: ['.tsx', '.ts', '.jsx', '.js'],
   },
   server: {
-    hmr: { overlay: false },
+    host: '0.0.0.0',
+    port: 3000,
+    hmr: true,
     allowedHosts: true,
     proxy: {
       '/api': {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getOrderList } from '../api';
-import type { Order } from '../types';
+import type { Order, User } from '../types';
 import OrderHistoryHeader from '../components/OrderHistoryHeader';
 import OrderHistoryContent from '../components/OrderHistoryContent';
 import OrderHistoryDetails from '../components/OrderHistoryDetails';
@@ -37,6 +37,19 @@ export default function OrderHistoryPage() {
 
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
 
+  const typedUser: User | null = user
+    ? {
+        id: user.id,
+        email: user.email,
+        passwordHash: user.password_hash,
+        name: user.name || user.username,
+        role: user.role,
+        googleId: user.google_id,
+        createdAt: '',
+        updatedAt: '',
+      }
+    : null;
+
   if (loading) {
     return <LoadingBlock label="Loading your orders..." />;
   }
@@ -46,7 +59,7 @@ export default function OrderHistoryPage() {
       <OrderHistoryHeader userName={user?.name || user?.email} orderCount={orders.length} />
       {error && <Alert tone="danger">{error}</Alert>}
       <OrderHistoryContent orders={orders} />
-      <OrderHistoryDetails user={user} orderCount={orders.length} totalSpent={totalSpent} />
+      <OrderHistoryDetails user={typedUser} orderCount={orders.length} totalSpent={totalSpent} />
     </div>
   );
 }

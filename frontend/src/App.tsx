@@ -22,6 +22,7 @@ import OrderPayPage from './pages/OrderPayPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import ProfilePage from './pages/ProfilePage';
+import UnpaidNotice from './components/UnpaidNotice';
 
 interface RequireAuthProps { children: ReactNode }
 
@@ -45,6 +46,7 @@ function App() {
           <div className="ds-page">
             <Navbar />
             <main className="ds-page-main">
+              <UnpaidNotice />
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/categories" element={<CategoryListPage />} />

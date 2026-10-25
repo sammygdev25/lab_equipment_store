@@ -24,7 +24,7 @@ export default function UnpaidNotice() {
   return (
     <div role="status" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)',
       padding: '0.6rem 1rem', textAlign: 'center', color: 'var(--color-text)' }}>
-      Order #{first.id} is waiting for payment ({first.amount.toFixed(2)}).{' '}
+      Order #{first.id} is waiting for payment ({Number(first.amount || 0).toFixed(2)}).{' '}
       <Link to={`/order-pay?order=${first.id}`} style={{ color: 'var(--color-primary)', fontWeight: 600 }}>Pay now</Link>
       {orders.length > 1 ? ` (${orders.length - 1} more)` : ''}
     </div>

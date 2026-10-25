@@ -7,9 +7,7 @@ if (!STRIPE_SECRET_KEY) {
   console.warn('[StripeService] STRIPE_SECRET_KEY is not set. Stripe calls will fail until it is configured.');
 }
 
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16',
-});
+const stripe = new Stripe(STRIPE_SECRET_KEY || 'sk_test_placeholder_key_not_configured');
 
 /**
  * Converts a decimal dollar amount (e.g. order.total_amount) into an integer

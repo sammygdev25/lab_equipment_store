@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../database';
 import { AuthRequest } from '../middleware/auth';
-import { createCheckoutSession, constructWebhookEvent } from '../services/stripeService';
+import { createPaymentIntent, constructWebhookEvent } from '../services/stripeService';
 
 const checkoutSchema = z.object({
   shippingAddress: z.string().min(1, 'Shipping address is required'),
@@ -101,6 +101,7 @@ export const createCheckout = async (req: AuthRequest, res: Response) => {
         totalAmount,
         status: 'pending',
         shippingAddress: parsed.data.shippingAddress,
+        stripePaymentIntentId: 'pending',
         items: {
           create: cartItems.map((item) => ({
             equipmentId: item.equipmentId,
@@ -114,27 +115,22 @@ export const createCheckout = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const session = await createCheckoutSession({
+    const paymentIntent = await createPaymentIntent({
       orderId: order.id,
       amount: totalAmount,
-      customerEmail: user.email,
-      items: order.items.map((item) => ({
-        name: item.equipment.name,
-        quantity: item.quantity,
-        price: Number(item.priceAtPurchase),
-      })),
+      receiptEmail: user.email,
     });
 
     await prisma.order.update({
       where: { id: order.id },
-      data: { stripePaymentIntentId: session.id },
+      data: { stripePaymentIntentId: paymentIntent.id },
     });
 
     await prisma.cartItem.deleteMany({ where: { userId: req.userId } });
 
     res.status(201).json({
-      order: { ...order, stripePaymentIntentId: session.id },
-      checkoutUrl: session.url,
+      order: { ...order, stripePaymentIntentId: paymentIntent.id },
+      clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
     console.error('[Orders] Error creating checkout session:', error);

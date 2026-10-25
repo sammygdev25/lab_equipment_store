@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api';
@@ -26,13 +26,14 @@ export default function CheckoutPage() {
     setError('');
     setLoading(true);
     try {
-      const order = await api.post<Order>('/orders/', {
+      const res = await api.post<Order>('/orders/', {
         shippingAddress: shippingAddress.trim(),
         items: items.map((item) => ({
           equipmentId: item.equipmentId,
           quantity: item.quantity,
         })),
       });
+      const order = res.data;
       await clearCart();
       navigate(`/orders/${order.id}`);
     } catch (err) {
@@ -50,7 +51,11 @@ export default function CheckoutPage() {
           icon="cart"
           title="Your cart is empty"
           text="Add lab equipment to your cart before checking out."
-          action={{ label: 'Browse equipment', to: '/categories' }}
+          action={
+            <Link to="/categories" className="btn btn-primary">
+              Browse equipment
+            </Link>
+          }
         />
       </div>
     );
@@ -59,14 +64,18 @@ export default function CheckoutPage() {
   return (
     <Stack gap="lg">
       <CheckoutHeader step="shipping" />
+      {error && (
+        <div className="ds-alert ds-alert-error" role="alert">
+          {error}
+        </div>
+      )}
       <CheckoutForm
         total={total}
         onSubmit={handleSubmit}
         loading={loading}
-        error={error}
         address={shippingAddress}
         onAddressChange={setShippingAddress}
-        customerName={user?.name}
+        customerName={user?.name ?? undefined}
         sidebar={
           <CheckoutSummary
             items={items}

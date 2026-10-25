@@ -53,7 +53,7 @@ export default function HomePage() {
   return (
     <div className="ds-stack-lg">
       {error && <Alert tone="danger">{error}</Alert>}
-      <HomeHero imageUrl="/img/hero-lab-equipment.jpg" />
+      <HomeHero imageUrl="/img/brand/hero.jpg" />
       <HomeFeatured equipment={equipment} loading={loading} onAddToCart={handleAddToCart} />
       <HomeCategories categories={categories} />
       <HomeAbout />

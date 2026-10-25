@@ -205,6 +205,16 @@ input[type="number"], input[type="search"], textarea, select {
   to { transform: rotate(360deg); }
 }
 
+.ds-category-card h3,
+.ds-category-card .ds-category-title,
+.category-card h3,
+.category-card .category-title {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word;
+}
+
 /* ── Responsive ─────────────────────────────────────── */
 html, body {
   overflow-x: hidden;

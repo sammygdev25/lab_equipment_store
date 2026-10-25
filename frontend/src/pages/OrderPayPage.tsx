@@ -28,7 +28,7 @@ export default function OrderPayPage() {
       {order && (
         <div style={{ background: 'var(--color-surface)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--color-border)' }}>
           {row('Order', `#${order.id}`)}
-          {row('Total', amount.toFixed(2))}
+          {row('Total', Number(amount || 0).toFixed(2))}
           {row('Status', paid ? 'Paid' : 'Awaiting payment')}
           <div style={{ marginTop: '1.5rem' }}><PayButton orderId={order.id} paid={paid} /></div>
         </div>

@@ -22,14 +22,17 @@ export default function OrderDetailMedia({ order }: OrderDetailMediaProps) {
     day: 'numeric',
   });
   const tone = STATUS_TONE[order.status] ?? 'neutral';
-  const needsPayment = !order.paidAt;
+  const needsPayment = order.status === 'pending';
 
   return (
     <Section tight>
       <Split>
-        <Media ratio="wide" badge={<Badge tone={tone}>{order.status}</Badge>}>
-          <Icon name="package" size={48} title="Lab equipment order" />
-        </Media>
+        <Media
+          ratio="wide"
+          badge={<Badge tone={tone}>{order.status}</Badge>}
+          title="Lab equipment order"
+          icon={<Icon name="package" size={32} />}
+        />
         <div className="ds-stack">
           <span className="ds-eyebrow">Order #{order.id}</span>
           <h1 className="ds-card-title">Equipment Order #{order.id}</h1>

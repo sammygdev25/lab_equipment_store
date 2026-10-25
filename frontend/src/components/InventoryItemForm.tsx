@@ -174,7 +174,7 @@ function InventoryItemForm({ initialData, onSubmit, categories, onCancel }: Inve
             type="text"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="/img/centrifuge-cx200.jpg"
+            placeholder="/img/brand/hero.jpg"
           />
         </div>
       </div>

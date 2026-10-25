@@ -1,0 +1,28 @@
+{
+  "name": "lab_equipment_store",
+  "type": "fullstack",
+  "version": "1.0.0",
+  "ports": [
+    3000,
+    8000
+  ],
+  "env": {},
+  "backend": {
+    "language": "typescript",
+    "framework": "express",
+    "entry": "src/index.ts",
+    "port": 8000,
+    "install": "npm install --legacy-peer-deps 2>/dev/null || npm install",
+    "run": "npx tsx src/index.ts",
+    "dir": "backend",
+    "env": {}
+  },
+  "frontend": {
+    "framework": "vite",
+    "dir": "frontend",
+    "port": 3000,
+    "install": "npm install",
+    "build": "",
+    "run": "npx vite --host 0.0.0.0 --port 3000"
+  }
+}

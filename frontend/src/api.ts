@@ -41,8 +41,14 @@ api.interceptors.response.use(
         localStorage.removeItem('refreshToken');
       }
     }
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
       localStorage.removeItem('token');
+      if (originalRequest.method === 'get') {
+        originalRequest._retry = true;
+        delete originalRequest.headers.Authorization;
+        return api(originalRequest);
+      }
     }
     return Promise.reject(error);
   }
@@ -218,4 +224,5 @@ export const registerUser = (userData: any) => api.post('/auth/register/', userD
 export const getCurrentUser = getProfile;
 export const updateUserProfile = (data: Partial<any>) => api.patch('/auth/profile/', data);
 
+export { api };
 export default api;
