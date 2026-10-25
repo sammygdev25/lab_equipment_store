@@ -13,6 +13,15 @@ import { requestLog } from './middleware/requestLog';
 import authRoutes from './routes/auth';
 import googleRoutes from './auth/google';
 import healthRoutes from './routes/health';
+import cartRoutes from './routes/cart';
+import catalogRoutes from './routes/catalog';
+import inventoryRoutes from './routes/inventory';
+import ordersRoutes from './routes/orders';
+import paymentsRoutes from './routes/payments';
+import webhooksRoutes from './routes/webhooks';
+import resEquipmentRoutes from './routes/res_equipment';
+import resCartItemRoutes from './routes/res_cart_item';
+import resOrderItemRoutes from './routes/res_order_item';
 
 const app = express();
 app.set('trust proxy', 1);
@@ -36,7 +45,21 @@ app.use('/api/auth', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/google', googleRoutes);
 
-// DOMAIN_ROUTES_PLACEHOLDER
+app.use('/api/cart', cartRoutes);
+app.use('/api/catalog', catalogRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/payments', paymentsRoutes);
+app.use('/api/webhooks', webhooksRoutes);
+app.use('/api/equipments', resEquipmentRoutes);
+app.use('/api/cart_items', resCartItemRoutes);
+app.use('/api/cart-items', resCartItemRoutes);
+app.use('/api/order_items', resOrderItemRoutes);
+app.use('/api/order-items', resOrderItemRoutes);
+app.use('/api', catalogRoutes);
+app.use('/api', healthRoutes);
+app.use('/api', paymentsRoutes);
+app.use('/api', webhooksRoutes);
 // DOMAIN_ROUTES_END
 
 if (config.serveFrontend) {

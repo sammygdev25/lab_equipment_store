@@ -18,6 +18,8 @@ export interface User {
   googleId: string | null;
   createdAt: string;
   updatedAt: string;
+  cartItems?: CartItem[];
+  orders?: Order[];
 }
 
 export const UserSchema = z.object({
@@ -39,6 +41,7 @@ export interface Category {
   description: string;
   createdAt: string;
   updatedAt: string;
+  equipments?: Equipment[];
 }
 
 export const CategorySchema = z.object({
@@ -64,6 +67,8 @@ export interface Equipment {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  cartItems?: CartItem[];
+  orderItems?: OrderItem[];
 }
 
 export const EquipmentSchema = z.object({
@@ -115,6 +120,7 @@ export interface Order {
   shippingAddress: string;
   createdAt: string;
   updatedAt: string;
+  items?: OrderItem[];
 }
 
 export const OrderSchema = z.object({

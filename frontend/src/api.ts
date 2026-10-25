@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { z } from 'zod';
-import { User, Category, Equipment, CartItem, Order, OrderItem, UserSchema, CategorySchema, EquipmentSchema, CartItemSchema, OrderSchema, OrderItemSchema, PaginatedResponseSchema } from './types';
+import { Category, Equipment, CartItem, Order, OrderItem, CategorySchema, EquipmentSchema, CartItemSchema, OrderSchema, OrderItemSchema, PaginatedResponseSchema } from './types';
 
 const API_BASE_URL = '/api';
 
@@ -66,38 +66,9 @@ export const register = (data: { username: string; email: string; password: stri
 export const logout = () => api.post('/auth/logout/');
 export const getProfile = () => api.get('/auth/profile/');
 
-// ── User API ──
-export const getUserList = async (params?: Record<string, unknown>): Promise<User[]> => {
-  const res = await api.get('/users/', params ? { params } : undefined);
-  const data = Array.isArray(res.data) ? res.data : (res.data?.results ?? res.data?.data ?? res.data?.items ?? res.data?.users ?? res.data?.users ?? []);
-  // The interface is the strict type: a field name the API does not send is a compile error, not an unknown.
-  return parseOr(z.array(UserSchema), data) as User[];
-};
-
-export const getUser = async (id: number | string | Record<string, unknown>): Promise<User> => {
-  // Pages sometimes call the detail getter with a filter object; route that to the list endpoint.
-  if (typeof id === 'object' && id !== null) return getUserList(id) as unknown as Promise<User>;
-  const res = await api.get(`/users/${id}/`);
-  return parseOr(UserSchema, res.data) as User;
-};
-
-export const createUser = async (data: Omit<User, 'id'>): Promise<User> => {
-  const res = await api.post('/users/', data);
-  return parseOr(UserSchema, res.data) as User;
-};
-
-export const updateUser = async (id: number, data: Partial<User>): Promise<User> => {
-  const res = await api.patch(`/users/${id}/`, data);
-  return parseOr(UserSchema, res.data) as User;
-};
-
-export const deleteUser = async (id: number) => {
-  await api.delete(`/users/${id}/`);
-};
-
 // ── Category API ──
 export const getCategoryList = async (params?: Record<string, unknown>): Promise<Category[]> => {
-  const res = await api.get('/categories/', params ? { params } : undefined);
+  const res = await api.get('/catalog/categories/', params ? { params } : undefined);
   const data = Array.isArray(res.data) ? res.data : (res.data?.results ?? res.data?.data ?? res.data?.items ?? res.data?.categories ?? res.data?.categories ?? []);
   // The interface is the strict type: a field name the API does not send is a compile error, not an unknown.
   return parseOr(z.array(CategorySchema), data) as Category[];
@@ -106,22 +77,22 @@ export const getCategoryList = async (params?: Record<string, unknown>): Promise
 export const getCategory = async (id: number | string | Record<string, unknown>): Promise<Category> => {
   // Pages sometimes call the detail getter with a filter object; route that to the list endpoint.
   if (typeof id === 'object' && id !== null) return getCategoryList(id) as unknown as Promise<Category>;
-  const res = await api.get(`/categories/${id}/`);
+  const res = await api.get(`/catalog/categories/${id}/`);
   return parseOr(CategorySchema, res.data) as Category;
 };
 
 export const createCategory = async (data: Omit<Category, 'id'>): Promise<Category> => {
-  const res = await api.post('/categories/', data);
+  const res = await api.post('/catalog/categories/', data);
   return parseOr(CategorySchema, res.data) as Category;
 };
 
 export const updateCategory = async (id: number, data: Partial<Category>): Promise<Category> => {
-  const res = await api.patch(`/categories/${id}/`, data);
+  const res = await api.patch(`/catalog/categories/${id}/`, data);
   return parseOr(CategorySchema, res.data) as Category;
 };
 
 export const deleteCategory = async (id: number) => {
-  await api.delete(`/categories/${id}/`);
+  await api.delete(`/catalog/categories/${id}/`);
 };
 
 // ── Equipment API ──
