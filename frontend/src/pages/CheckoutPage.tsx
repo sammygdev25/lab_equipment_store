@@ -5,7 +5,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api';
 import CheckoutHeader from '../components/CheckoutHeader';
 import CheckoutForm from '../components/CheckoutForm';
-import CheckoutSummary from '../components/CheckoutSummary';
 import { EmptyState, Stack } from '../components/ui';
 import type { Order } from '../types';
 
@@ -14,20 +13,15 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [shippingAddress, setShippingAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async () => {
-    if (!shippingAddress.trim()) {
-      setError('Please enter a shipping address before placing your order.');
-      return;
-    }
+  const handleSubmit = async (data: { shippingAddress: string; contactName: string; contactEmail: string; contactPhone: string; deliveryMethod: string }) => {
     setError('');
     setLoading(true);
     try {
       const res = await api.post<Order>('/orders/', {
-        shippingAddress: shippingAddress.trim(),
+        shippingAddress: data.shippingAddress.trim(),
         items: items.map((item) => ({
           equipmentId: item.equipmentId,
           quantity: item.quantity,
@@ -73,18 +67,6 @@ export default function CheckoutPage() {
         total={total}
         onSubmit={handleSubmit}
         loading={loading}
-        address={shippingAddress}
-        onAddressChange={setShippingAddress}
-        customerName={user?.name ?? undefined}
-        sidebar={
-          <CheckoutSummary
-            items={items}
-            total={total}
-            onSubmit={handleSubmit}
-            loading={loading}
-            submitLabel={loading ? 'Placing order...' : 'Place order'}
-          />
-        }
       />
     </Stack>
   );

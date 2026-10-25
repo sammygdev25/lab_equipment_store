@@ -29,13 +29,14 @@ export default function OrderDetailMedia({ order }: OrderDetailMediaProps) {
       <Split>
         <Media
           ratio="wide"
+          alt="Lab equipment order"
           badge={<Badge tone={tone}>{order.status}</Badge>}
-          title="Lab equipment order"
-          icon={<Icon name="package" size={32} />}
         />
         <div className="ds-stack">
           <span className="ds-eyebrow">Order #{order.id}</span>
-          <h1 className="ds-card-title">Equipment Order #{order.id}</h1>
+          <h1 className="ds-card-title">
+            <Icon name="package" size={20} /> Equipment Order #{order.id}
+          </h1>
           <CardMeta>
             Placed on {createdAt} &middot; {itemCount} {itemCount === 1 ? 'item' : 'items'}
           </CardMeta>
